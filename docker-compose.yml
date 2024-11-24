@@ -1,0 +1,10 @@
+services:
+  marreta-bot:
+    container_name: marreta-bot
+    image: ghcr.io/manualdousuario/marreta-bot:latest
+    environment:
+      - NODE_ENV=production
+      - BLUESKY_USERNAME=${BLUESKY_USERNAME}
+      - BLUESKY_PASSWORD=${BLUESKY_PASSWORD}
+      - CRON_SECRET=${CRON_SECRET}
+    restart: unless-stopped
