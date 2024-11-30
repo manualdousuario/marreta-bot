@@ -1,40 +1,31 @@
-import { t } from "../dictionary/translate";
 import { Post } from "../types";
 import { getReplyData } from "../utils/get-reply-data";
 import { createPost } from "./create-post";
-import { NotAReplyError } from "../errors";
 
 export const handleRequest = async (parent: Post, post: Post) => {
-  if (typeof post.record.reply === "undefined") {
-    throw new NotAReplyError(post);
-  }
-
-  const string = `${t("success.reply", post.record.langs)}`;
-
   const urlParts = parent.uri.split("/");
-  const threadReq = await fetch(
+  const parentThread = await fetch(
     `https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread?uri=at://${urlParts[2]}/app.bsky.feed.post/${urlParts[4]}&depth=10`
   );
 
-  const data = await threadReq.json();
+  const postData = await parentThread.json();
 
-  let url = "";
   let recordURI = null;
 
-  if (data.thread.post.embed["$type"] === "app.bsky.embed.external#view") {
-    url = await fetchEndpoint(data.thread.post.embed.external.uri);
+  if (postData.thread.post.embed["$type"] === "app.bsky.embed.external#view") {
+    const { url, status, error } = await fetchEndpoint(
+      postData.thread.post.embed.external.uri
+    );
 
-    console.log(url);
-
-    if (!!url) {
+    if (url && status === 200) {
       recordURI = await createPost({
-        text: string,
+        text: `${url} ${randomEmoji("success")}`,
         reply: getReplyData(post),
         facets: [
           {
             index: {
               byteStart: 0,
-              byteEnd: string.length - 1,
+              byteEnd: url.length,
             },
             features: [
               {
@@ -45,16 +36,43 @@ export const handleRequest = async (parent: Post, post: Post) => {
           },
         ],
       });
+    } else if (!url && status === 400 && error.code === "BLOCKED_DOMAIN") {
+      recordURI = await createPost({
+        text: `Este site é à prova de marretadas ${randomEmoji("blocked")}`,
+        reply: getReplyData(post),
+      });
+    } else {
+      recordURI = await createPost({
+        text: `Não é você, sou eu. Algo deu errado… ${randomEmoji("error")}`,
+        reply: getReplyData(post),
+      });
     }
+  } else {
+    recordURI = await createPost({
+      text: `Não é você, sou eu. Algo deu errado… ${randomEmoji("error")}`,
+      reply: getReplyData(post),
+    });
   }
 
   return recordURI;
 };
 
+const randomEmoji = (type: string) => {
+  let emojis = [];
+
+  if (type === "success") {
+    emojis = ["🪓", "🧨", "🛡️", "💣", "🧱", "🔨", "⚒️", "🛠️"];
+  } else if (type === "blocked") {
+    emojis = ["😭", "😤", "😡", "🤬"];
+  } else if (type === "error") {
+    emojis = ["😧", "😮", "😲", "😯", "🙄", "😬", "😥", "😓", "🥵"];
+  }
+
+  return emojis[Math.floor(Math.random() * emojis.length)];
+};
+
 const fetchEndpoint = async (url: string) => {
   const endpoint = `https://marreta.pcdomanual.com/api/${url}`;
-
-  console.log(endpoint);
 
   try {
     // Perform the fetch request
@@ -72,11 +90,14 @@ const fetchEndpoint = async (url: string) => {
 
     // Process the response
     if (data.status === 200) {
-      return data.url;
+      return { url: data.url, status: 200, error: null };
+    } else if (data.status === 400) {
+      return { url: null, status: 400, error: data.error };
     } else {
-      return null;
+      return { url: null, status: -1, error: null };
     }
   } catch (error) {
     console.error("Fetch error:", error);
+    return { url: null, status: -1, error: null };
   }
 };
