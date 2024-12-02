@@ -58,7 +58,7 @@ export const handleRequest = async (parent: Post, post: Post) => {
 };
 
 const randomEmoji = (type: string) => {
-  let emojis = [];
+  let emojis: string[] = [];
 
   if (type === "success") {
     emojis = ["🪓", "🧨", "🛡️", "💣", "🧱", "🔨", "⚒️", "🛠️"];
