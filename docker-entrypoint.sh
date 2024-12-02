@@ -16,6 +16,10 @@ if [ -z "$CRON_SECRET" ]; then
     exit 1
 fi
 
+# Para o cron conseguir pegar o valor do SECRET
+env | grep CRON_SECRET > /etc/environment
+chmod 644 /etc/environment
+
 # Iniciar o cron
 service cron start
 
