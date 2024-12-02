@@ -9,7 +9,7 @@ export const t = (
   const language =
     (languages?.find((l) => Object.values<string>(Languages).includes(l)) as
       | Languages
-      | undefined) ?? Languages.EN;
+      | undefined) ?? Languages.PT;
 
   return responses[key][language].replace(/\{\{(\w+)\}\}/g, (_, p1) => {
     return params?.[p1] || "";
