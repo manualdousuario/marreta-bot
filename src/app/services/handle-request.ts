@@ -13,37 +13,49 @@ export const handleRequest = async (parent: Post, post: Post) => {
   let recordURI = null;
 
   if (postData.thread.post.embed["$type"] === "app.bsky.embed.external#view") {
-    const { url, status, error } = await fetchEndpoint(
-      postData.thread.post.embed.external.uri
-    );
+    const externalUrl = postData.thread.post.embed.external.uri;
+    console.log("Processing external URL:", externalUrl);
 
-    if (url && status === 200) {
-      recordURI = await createPost({
-        text: `${url} ${randomEmoji("success")}`,
-        reply: getReplyData(post),
-        facets: [
-          {
-            index: {
-              byteStart: 0,
-              byteEnd: url.length,
-            },
-            features: [
-              {
-                $type: "app.bsky.richtext.facet#link",
-                uri: `${url}`,
+    try {
+      // Basic URL validation
+      new URL(externalUrl);
+
+      const { url, status, error } = await fetchEndpoint(externalUrl);
+
+      if (url && status === 200) {
+        recordURI = await createPost({
+          text: `${url} ${randomEmoji("success")}`,
+          reply: getReplyData(post),
+          facets: [
+            {
+              index: {
+                byteStart: 0,
+                byteEnd: url.length,
               },
-            ],
-          },
-        ],
-      });
-    } else if (!url && status === 400 && error.code === "BLOCKED_DOMAIN") {
+              features: [
+                {
+                  $type: "app.bsky.richtext.facet#link",
+                  uri: `${url}`,
+                },
+              ],
+            },
+          ],
+        });
+      } else if (!url && status === 400 && error?.code === "BLOCKED_DOMAIN") {
+        recordURI = await createPost({
+          text: `Este site é à prova de marretadas ${randomEmoji("blocked")}`,
+          reply: getReplyData(post),
+        });
+      } else {
+        recordURI = await createPost({
+          text: `Não é você, sou eu. Algo deu errado… ${randomEmoji("error")}`,
+          reply: getReplyData(post),
+        });
+      }
+    } catch (error) {
+      console.error("Invalid URL format:", externalUrl, error);
       recordURI = await createPost({
-        text: `Este site é à prova de marretadas ${randomEmoji("blocked")}`,
-        reply: getReplyData(post),
-      });
-    } else {
-      recordURI = await createPost({
-        text: `Não é você, sou eu. Algo deu errado… ${randomEmoji("error")}`,
+        text: `URL inválida ${randomEmoji("error")}`,
         reply: getReplyData(post),
       });
     }
@@ -72,20 +84,35 @@ const randomEmoji = (type: string) => {
 };
 
 const fetchEndpoint = async (url: string) => {
-  const endpoint = `https://marreta.pcdomanual.com/api/${url}`;
-
   try {
+    // Encode the URL properly
+    const encodedUrl = encodeURIComponent(url);
+    const endpoint = `https://marreta.pcdomanual.com/api/${encodedUrl}`;
+
+    console.log("Making request to endpoint:", endpoint);
+
     // Perform the fetch request
-    const response = await fetch(endpoint, { method: "GET" });
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    // Log response status and headers for debugging
+    console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers));
 
     // Check if the response is ok
     if (!response.ok) {
+      console.error("Response not OK:", response.status, response.statusText);
+      const errorText = await response.text();
+      console.error("Error response body:", errorText);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     // Parse the response as JSON
     const data = await response.json();
-
     console.log("API Response:", data);
 
     // Process the response
@@ -94,6 +121,7 @@ const fetchEndpoint = async (url: string) => {
     } else if (data.status === 400) {
       return { url: null, status: 400, error: data.error };
     } else {
+      console.error("Unexpected response status:", data.status);
       return { url: null, status: -1, error: null };
     }
   } catch (error) {
