@@ -16,5 +16,5 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-WORKDIR /.next/standalone/
+WORKDIR /app/.next/standalone/
 CMD ["node", "server.js"]
