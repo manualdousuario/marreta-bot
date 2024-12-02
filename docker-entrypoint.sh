@@ -16,5 +16,8 @@ if [ -z "$CRON_SECRET" ]; then
     exit 1
 fi
 
-# Se todas as variáveis estiverem definidas, inicia a aplicação
+# Iniciar o cron
+service cron start
+
+# Executar comando principal do Next.js server
 exec "$@"
