@@ -24,13 +24,13 @@ export const handleRequest = async (parent: Post, post: Post) => {
 
       if (url && status === 200) {
         recordURI = await createPost({
-          text: `${url} ${randomEmoji("success")}`,
+          text: `🔗 Chapeu de paywall é Marreta! ${randomEmoji("success")}`,
           reply: getReplyData(post),
           facets: [
             {
               index: {
-                byteStart: 0,
-                byteEnd: url.length,
+                byteStart: 5,
+                byteEnd: 34,
               },
               features: [
                 {
@@ -95,8 +95,8 @@ const fetchEndpoint = async (url: string) => {
     const response = await fetch(endpoint, {
       method: "GET",
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: "application/json",
+      },
     });
 
     // Log response status and headers for debugging
