@@ -41,9 +41,23 @@ export const handleRequest = async (parent: Post, post: Post) => {
             },
           ],
         });
-      } else if (!url && status === 400 && error?.code === "BLOCKED_DOMAIN") {
+      } else {
+        recordURI = await createPost({
+          text: `Não é você, sou eu. Algo deu errado… ${randomEmoji("error")}`,
+          reply: getReplyData(post),
+        });
+      }
+    } catch (error) {
+      if (error?.code === "BLOCKED_DOMAIN") {
+        console.error("Blocked domain:", externalUrl, error);
         recordURI = await createPost({
           text: `Este site é à prova de marretadas ${randomEmoji("blocked")}`,
+          reply: getReplyData(post),
+        });
+      } else if (error?.code === "INVALID_URL") {
+        console.error("Invalid URL format:", externalUrl, error);
+        recordURI = await createPost({
+          text: `URL inválida ${randomEmoji("error")}`,
           reply: getReplyData(post),
         });
       } else {
@@ -52,12 +66,6 @@ export const handleRequest = async (parent: Post, post: Post) => {
           reply: getReplyData(post),
         });
       }
-    } catch (error) {
-      console.error("Invalid URL format:", externalUrl, error);
-      recordURI = await createPost({
-        text: `URL inválida ${randomEmoji("error")}`,
-        reply: getReplyData(post),
-      });
     }
   } else {
     recordURI = await createPost({
