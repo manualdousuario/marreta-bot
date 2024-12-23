@@ -22,7 +22,7 @@ export const handleRequest = async (parent: Post, post: Post) => {
 
       const { url, status, error } = await fetchEndpoint(externalUrl);
 
-      if (url && status === 200) {
+      if (url && status === 200 && !error) {
         recordURI = await createPost({
           text: `🔗 Chapeu de paywall é Marreta! ${randomEmoji("success")}`,
           reply: getReplyData(post),
