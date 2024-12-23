@@ -47,7 +47,7 @@ export const handleRequest = async (parent: Post, post: Post) => {
           reply: getReplyData(post),
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error?.code === "BLOCKED_DOMAIN") {
         console.error("Blocked domain:", externalUrl, error);
         recordURI = await createPost({
