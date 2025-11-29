@@ -95,7 +95,7 @@ const fetchEndpoint = async (url: string) => {
   try {
     // Encode the URL properly
     const encodedUrl = encodeURIComponent(url);
-    const endpoint = `https://marreta.pcdomanual.com/api/${encodedUrl}`;
+    const endpoint = `https://marreta.link/api/${encodedUrl}`;
 
     console.log("Making request to endpoint:", endpoint);
 

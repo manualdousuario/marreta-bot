@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: "/",
-        destination: "https://marreta.pcdomanual.com/",
+        destination: "https://marreta.link/",
         permanent: false,
       },
     ];
