@@ -9,7 +9,6 @@ on:
 env:
   DOCKER_REGISTRY: ghcr.io
   DOCKER_IMAGE_NAME: ${{ github.repository }}
-  DOCKERHUB_REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}/marreta
 
 jobs:
   docker-build-amd64:
@@ -47,12 +46,6 @@ jobs:
             type=raw,value=latest
           flavor: |
             suffix=-amd64
-
-      - name: 🔐 Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: 🔐 Log in to GitHub Registry
         uses: docker/login-action@v3
@@ -105,12 +98,6 @@ jobs:
           flavor: |
             suffix=-arm64
 
-      - name: 🔐 Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: 🔐 Log in to GitHub Registry
         uses: docker/login-action@v3
         with:
@@ -157,12 +144,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=sha
             type=raw,value=latest
-
-      - name: 🔐 Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: 🔐 Log in to GitHub Registry
         uses: docker/login-action@v3
