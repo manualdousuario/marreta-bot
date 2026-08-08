@@ -1,0 +1,5 @@
+# Scripts executados dentro do container precisam de LF: com CRLF o kernel
+# procura por "/bin/sh\r" e o entrypoint falha com "no such file or directory".
+*.sh text eol=lf
+crontab text eol=lf
+docker-entrypoint.sh text eol=lf

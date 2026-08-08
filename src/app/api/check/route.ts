@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { AppBskyFeedDefs } from "@atproto/api";
 import { getNotifications } from "@/app/bot/services/get-notifications";
 import { getPostThread } from "@/app/bot/services/get-post-thread";
 import { getUnreadNotificationsCount } from "@/app/bot/services/get-unread-notifications-count";
@@ -6,12 +6,13 @@ import { updateSeen } from "@/app/bot/services/updateSeen";
 
 import { handleError } from "@/app/services/handle-error";
 import { handleRequest } from "@/app/services/handle-request";
+import { NotAReplyError } from "@/app/errors";
 import { Post } from "@/app/types";
 import { validateCronSecret } from "@/app/utils/validate-cron-secret";
 import { NextRequest } from "next/server";
 
 // disable static page generation
-export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 interface Successful {
   notificationURI: string;
@@ -60,7 +61,18 @@ export const GET = async (request: NextRequest) => {
 
       const thread = await getPostThread(notification.uri);
 
-      const recordURI = await handleRequest(thread.parent.post as Post, thread.post as Post);
+      if (!AppBskyFeedDefs.isThreadViewPost(thread)) {
+        throw new Error(`Thread não encontrada para ${notification.uri}`);
+      }
+
+      if (!AppBskyFeedDefs.isThreadViewPost(thread.parent)) {
+        throw new NotAReplyError(thread.post as Post);
+      }
+
+      const recordURI = await handleRequest(
+        thread.parent.post as Post,
+        thread.post as Post
+      );
 
       success.push({ notificationURI: notification.uri, recordURI });
 

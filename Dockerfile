@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:24
 
 RUN apt-get update && apt-get install -y cron curl
 
@@ -19,8 +19,8 @@ WORKDIR /app
 RUN npm ci
 RUN npm run build
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 

@@ -1,4 +1,4 @@
-import { Notification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
+import type { AppBskyNotificationListNotifications } from "@atproto/api";
 import { getReplyData } from "../utils/get-reply-data";
 import { createPost } from "./create-post";
 import { Post, Record } from "../types";
@@ -8,7 +8,7 @@ import  { NotAReplyError } from "../errors";
 
 export const handleError = async (
   error: unknown,
-  notification: Notification
+  notification: AppBskyNotificationListNotifications.Notification
 ) => {
   const reply = (post: Post, text: string) =>
     createPost({

@@ -1,7 +1,7 @@
-import { AppBskyFeedPost } from "@atproto/api";
+import type { AppBskyFeedPost, Un$Typed } from "@atproto/api";
 import { createRecord } from "../bot/services/create-record";
 
-type CreatePostData = Partial<AppBskyFeedPost.Record> & {
+type CreatePostData = Partial<Un$Typed<AppBskyFeedPost.Record>> & {
   text: string;
 };
 

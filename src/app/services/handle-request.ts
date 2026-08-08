@@ -47,14 +47,16 @@ export const handleRequest = async (parent: Post, post: Post) => {
           reply: getReplyData(post),
         });
       }
-    } catch (error: any) {
-      if (error?.code === "BLOCKED_DOMAIN") {
+    } catch (error) {
+      const code = (error as { code?: string } | null | undefined)?.code;
+
+      if (code === "BLOCKED_DOMAIN") {
         console.error("Blocked domain:", externalUrl, error);
         recordURI = await createPost({
           text: `Este site é à prova de marretadas ${randomEmoji("blocked")}`,
           reply: getReplyData(post),
         });
-      } else if (error?.code === "INVALID_URL") {
+      } else if (code === "INVALID_URL") {
         console.error("Invalid URL format:", externalUrl, error);
         recordURI = await createPost({
           text: `URL inválida ${randomEmoji("error")}`,
